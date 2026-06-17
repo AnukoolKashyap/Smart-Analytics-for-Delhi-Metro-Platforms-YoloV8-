@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+venv/
+.venv/
+*.pt
+.streamlit/
+yolov8n.pt

@@ -1,0 +1,28 @@
+{
+  "_comment": "Polygon points are normalized (0-1) fractions of frame width/height, so the same config works regardless of camera resolution. Replace these with real coordinates for your platform camera using tools/zone_selector.py. 'capacity' is the comfortable max headcount for that zone before it is considered CRITICAL.",
+  "zones": [
+    {
+      "id": "zone_a",
+      "name": "Zone A - Near Entry/Stairs",
+      "polygon": [[0.0, 0.0], [0.33, 0.0], [0.33, 1.0], [0.0, 1.0]],
+      "capacity": 10
+    },
+    {
+      "id": "zone_b",
+      "name": "Zone B - Platform Center",
+      "polygon": [[0.33, 0.0], [0.66, 0.0], [0.66, 1.0], [0.33, 1.0]],
+      "capacity": 10
+    },
+    {
+      "id": "zone_c",
+      "name": "Zone C - Far End",
+      "polygon": [[0.66, 0.0], [1.0, 0.0], [1.0, 1.0], [0.66, 1.0]],
+      "capacity": 10
+    }
+  ],
+  "density_thresholds": {
+    "low": 0.4,
+    "medium": 0.7,
+    "high": 0.9
+  }
+}
