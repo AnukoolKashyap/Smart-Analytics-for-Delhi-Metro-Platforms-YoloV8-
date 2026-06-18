@@ -17,3 +17,4 @@ output/*
 !output/analytics_hourly.csv
 !output/summary.json
 ARCHITECTURE_AND_CODE_GUIDE.md
+guide/

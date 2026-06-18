@@ -1,24 +1,32 @@
 {
-  "video": "data/sample_platform_footage.avi",
-  "backend": "hog",
-  "frames_processed": 795,
-  "fps_processing_speed": 11.02,
+  "video": "D:\\transline\\delhi-metro-crowd-analytics\\data\\sample_platform_footage.avi",
+  "backend": "yolo",
+  "frames_processed": 350,
+  "fps_processing_speed": 20.58,
   "final_zone_counts": {
-    "zone_a": 1,
-    "zone_b": 0,
-    "zone_c": 1
+    "zone_a": 0,
+    "zone_b": 4,
+    "zone_c": 2
   },
   "final_density_levels": {
     "zone_a": "LOW",
-    "zone_b": "LOW",
+    "zone_b": "MEDIUM",
     "zone_c": "LOW"
   },
-  "redistribution_suggestion": null,
-  "surge_alerts": [],
+  "redistribution_suggestion": "Zone B - Platform Center is at 40% of capacity while Zone A - Near Entry/Stairs is at 0% -- direct incoming passengers toward Zone A - Near Entry/Stairs.",
+  "surge_alerts": [
+    {
+      "zone_id": "zone_b",
+      "zone_name": "Zone B - Platform Center",
+      "previous": 1.66,
+      "current": 3.0,
+      "pct_increase": 80.72289156626506
+    }
+  ],
   "outputs": {
-    "annotated_video": "output/annotated_video.mp4",
-    "heatmap": "output/heatmap.png",
-    "analytics_raw_csv": "output/analytics_raw.csv",
-    "analytics_hourly_csv": "output/analytics_hourly.csv"
+    "annotated_video": "D:\\transline\\delhi-metro-crowd-analytics\\output\\annotated_video.mp4",
+    "heatmap": "D:\\transline\\delhi-metro-crowd-analytics\\output\\heatmap.png",
+    "analytics_raw_csv": "D:\\transline\\delhi-metro-crowd-analytics\\output\\analytics_raw.csv",
+    "analytics_hourly_csv": "D:\\transline\\delhi-metro-crowd-analytics\\output\\analytics_hourly.csv"
   }
 }
