@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install lightweight test dependencies
+        # Deliberately NOT installing ultralytics/torch/streamlit here:
+        # - the unit tests only exercise the pure-logic modules (zones,
+        #   analytics, the CentroidTracker), no model weights needed.
+        # - YOLODetector imports ultralytics lazily inside its own
+        #   __init__, so even running the pipeline end to end on the
+        #   HOG backend never touches that import path.
+        # This keeps CI fast and avoids any model-weight download in CI.
+        run: |
+          pip install pytest opencv-python-headless numpy pandas "imageio[ffmpeg]"
+
+      - name: Run unit tests
+        run: pytest tests/ -v
+
+      - name: Smoke test the full pipeline (HOG backend, no model weights needed)
+        run: |
+          cd src
+          python pipeline.py \
+            --video ../data/sample_platform_footage.avi \
+            --backend hog \
+            --max-frames 30 \
+            --detect-every 5 \
+            --output ../ci_smoke_output
+
+      - name: Verify smoke test produced real output files
+        run: |
+          test -s ci_smoke_output/annotated_video.mp4
+          test -s ci_smoke_output/heatmap.png
+          test -s ci_smoke_output/analytics_raw.csv
+          test -s ci_smoke_output/summary.json
+          echo "All expected output files were generated and are non-empty."

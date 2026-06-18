@@ -2,7 +2,16 @@
 
 A YOLOv8-based crowd analytics pipeline for metro platforms: zone-wise occupancy detection, density classification, hourly-style trend analytics, crowd heatmaps, and redistribution alerts — built end to end (detection → tracking → zone logic → analytics → dashboard) as a personal portfolio project.
 
-![heatmap sample](output/heatmap.png)
+![heatmap sample](assets/heatmap_example.png)
+
+**What the pipeline actually outputs** — left to right: raw YOLO/HOG detections with foot-points marked, the same frame with zone boundaries overlaid (so you can see people getting split into different zones), and the accumulated heatmap above:
+
+<table>
+<tr>
+<td><img src="assets/detection_example.png" width="380"/></td>
+<td><img src="assets/zones_overlay_example.png" width="380"/></td>
+</tr>
+</table>
 
 ## Problem statement
 
@@ -55,6 +64,9 @@ dashboard/app.py   Streamlit UI on top of all the above
 
 ```
 delhi-metro-crowd-analytics/
+├── .github/workflows/
+│   └── ci.yml                 runs the test suite + a HOG smoke test on every push
+├── assets/                    screenshots used in this README (permanent, tracked)
 ├── config/
 │   └── zones.json            zone polygons (normalized coords) + capacities + thresholds
 ├── data/
@@ -65,14 +77,25 @@ delhi-metro-crowd-analytics/
 │   ├── heatmap.py             HeatmapAccumulator
 │   ├── analytics.py           logging, bucketing, suggestions, forecast, surge detection
 │   └── pipeline.py            orchestrates everything end to end (CLI entry point)
+├── tests/                     pytest unit tests for the pure-logic modules
 ├── tools/
 │   └── zone_selector.py       interactive tool to draw custom zones on your own footage
 ├── dashboard/
 │   └── app.py                 Streamlit dashboard
-├── output/                    sample outputs from a real run (shipped for review)
+├── output/                    where a real run's results land (gitignored except a small example)
 ├── requirements.txt
+├── LICENSE
 └── README.md
 ```
+
+## Testing & CI
+
+```bash
+pip install pytest
+pytest tests/ -v
+```
+
+26 tests cover the pure-logic modules — zone geometry/density classification (`test_zones.py`), the bucketing/forecast/surge/redistribution functions (`test_analytics.py`), and the offline `CentroidTracker` (`test_detector.py`) — none of them need a video file or model weights, so they run in well under a second. `.github/workflows/ci.yml` runs this suite plus a 30-frame HOG-backend smoke test of the real pipeline on every push, without ever needing to install `ultralytics`/`torch` or download any model weights in CI.
 
 ## Setup
 
@@ -118,14 +141,9 @@ Two detector backends are included on purpose, not as a shortcut:
 - **`yolo` (recommended/default for real use)** — YOLOv8 + ByteTrack. Downloads model weights (~6MB) from Ultralytics' servers on first run, so it needs internet access once; cached after that.
 - **`hog`** — a fully offline OpenCV HOG person detector + a lightweight custom centroid tracker (`CentroidTracker` in `detector.py`). Lower accuracy and no real re-identification, but useful for a quick dependency-free smoke test, or in network-restricted environments. The sample outputs shipped in `output/` were generated with this backend, since the sandbox this was built in blocks the YOLO weight download (a sandbox-network restriction, not a code limitation — it downloads normally on a regular machine).
 
-## Sample output (shipped in `output/`)
+## Sample output
 
-Generated from the full 795-frame / 79.5s bundled clip, simulated as an 08:00–09:20 rush-hour window (60x time-scale), with the HOG backend and 10-minute aggregation buckets:
-
-- `annotated_video.mp4` — zone outlines, live legend (sim-time + per-zone count/capacity/density), detection boxes
-- `heatmap.png` — accumulated foot-traffic density
-- `analytics_raw.csv` / `analytics_hourly.csv` — per-frame and bucketed zone occupancy
-- `summary.json` — final zone state, redistribution suggestion (if any), surge alerts (if any)
+Running the command above regenerates everything in `output/`: `annotated_video.mp4` (zone outlines, live legend, detection boxes), `heatmap.png`, `analytics_raw.csv` / `analytics_hourly.csv`, and `summary.json` (final zone state, redistribution suggestion if any, surge alerts if any). The video and heatmap aren't tracked in git — they're a few/tens of MB and trivially regenerable by running the pipeline once, so there's no reason to carry them around in version control. The small `analytics_raw.csv` / `analytics_hourly.csv` / `summary.json` from one real run are kept as a tracked worked example; the screenshots at the top of this README are the permanent visual reference for the video/heatmap, generated from the same 795-frame / 79.5s bundled clip, simulated as an 08:00–09:20 rush-hour window (60x time-scale), HOG backend, 10-minute buckets.
 
 ## Limitations (honest, on purpose)
 
@@ -147,3 +165,7 @@ Generated from the full 795-frame / 79.5s bundled clip, simulated as an 08:00–
 ## Disclaimer
 
 Personal academic/portfolio project. Ridership statistics referenced from public DMRC reporting (2025). Not affiliated with, endorsed by, or built using any non-public data from DMRC.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

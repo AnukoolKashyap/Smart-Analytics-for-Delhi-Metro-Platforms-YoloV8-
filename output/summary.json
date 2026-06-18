@@ -1,46 +1,24 @@
 {
-  "video": "C:\\Users\\kashy\\AppData\\Local\\Temp\\tmpcv5wwopk.mp4",
-  "backend": "yolo",
-  "frames_processed": 800,
-  "fps_processing_speed": 23.41,
+  "video": "data/sample_platform_footage.avi",
+  "backend": "hog",
+  "frames_processed": 795,
+  "fps_processing_speed": 11.02,
   "final_zone_counts": {
-    "zone_a": 3,
-    "zone_b": 2,
-    "zone_c": 6
+    "zone_a": 1,
+    "zone_b": 0,
+    "zone_c": 1
   },
   "final_density_levels": {
     "zone_a": "LOW",
     "zone_b": "LOW",
-    "zone_c": "MEDIUM"
+    "zone_c": "LOW"
   },
-  "redistribution_suggestion": "Zone C - Far End is at 60% of capacity while Zone B - Platform Center is at 20% -- direct incoming passengers toward Zone B - Platform Center.",
-  "surge_alerts": [
-    {
-      "zone_id": "zone_a",
-      "zone_name": "Zone A - Near Entry/Stairs",
-      "previous": 1.216,
-      "current": 2.903225806451613,
-      "pct_increase": 138.7521222410866
-    },
-    {
-      "zone_id": "zone_b",
-      "zone_name": "Zone B - Platform Center",
-      "previous": 1.512,
-      "current": 2.6129032258064515,
-      "pct_increase": 72.81105990783409
-    },
-    {
-      "zone_id": "zone_c",
-      "zone_name": "Zone C - Far End",
-      "previous": 3.256,
-      "current": 5.129032258064516,
-      "pct_increase": 57.52556075136721
-    }
-  ],
+  "redistribution_suggestion": null,
+  "surge_alerts": [],
   "outputs": {
-    "annotated_video": "D:\\transline\\delhi-metro-crowd-analytics\\output\\annotated_video.mp4",
-    "heatmap": "D:\\transline\\delhi-metro-crowd-analytics\\output\\heatmap.png",
-    "analytics_raw_csv": "D:\\transline\\delhi-metro-crowd-analytics\\output\\analytics_raw.csv",
-    "analytics_hourly_csv": "D:\\transline\\delhi-metro-crowd-analytics\\output\\analytics_hourly.csv"
+    "annotated_video": "output/annotated_video.mp4",
+    "heatmap": "output/heatmap.png",
+    "analytics_raw_csv": "output/analytics_raw.csv",
+    "analytics_hourly_csv": "output/analytics_hourly.csv"
   }
 }

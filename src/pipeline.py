@@ -25,12 +25,20 @@ import time
 from datetime import timedelta
 
 import cv2
+import imageio.v2 as imageio
 import numpy as np
 
 from analytics import AnalyticsLogger, bucket_aggregate, detect_surge, redistribution_suggestion
 from detector import build_detector
 from heatmap import HeatmapAccumulator
 from zones import DENSITY_COLORS_BGR, ZoneManager
+
+# Resolved relative to this file, not the caller's working directory, so
+# `python src/pipeline.py ...` works the same whether you run it from the
+# project root or from inside src/ -- a plain string default like
+# "config/zones.json" would silently break in the second case.
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEFAULT_ZONES_PATH = os.path.join(_PROJECT_ROOT, "config", "zones.json")
 
 
 def parse_sim_start(s: str) -> int:
@@ -49,7 +57,7 @@ def seconds_to_hhmm(total_seconds: float) -> str:
 
 def run_pipeline(
     video_path: str,
-    zones_config_path: str = "config/zones.json",
+    zones_config_path: str = DEFAULT_ZONES_PATH,
     output_dir: str = "output",
     backend: str = "hog",
     model_path: str = "yolov8n.pt",
@@ -84,8 +92,16 @@ def run_pipeline(
     logger = AnalyticsLogger()
 
     out_video_path = os.path.join(output_dir, "annotated_video.mp4")
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    writer = cv2.VideoWriter(out_video_path, fourcc, fps, (frame_w, frame_h))
+    # cv2.VideoWriter's bundled FFmpeg generally can't encode H.264 (no licensed
+    # encoder in most opencv-python builds) -- it silently falls back to mp4v,
+    # which Chrome/Firefox/Streamlit's <video> tag won't play even though the
+    # file itself is valid. imageio (with its bundled ffmpeg binary -- no
+    # system ffmpeg install needed) writes real H.264/yuv420p, which is what
+    # browsers actually need.
+    writer = imageio.get_writer(
+        out_video_path, fps=fps, codec="libx264", format="FFMPEG",
+        pixelformat="yuv420p", macro_block_size=None,
+    )
 
     sim_start_sec = parse_sim_start(sim_start_time)
     last_dets = []
@@ -146,12 +162,12 @@ def run_pipeline(
             y = 8 + 22 + i * line_h
             cv2.putText(overlay, text, (8 + 12, y), font, scale, color, thick, cv2.LINE_AA)
 
-        writer.write(overlay)
+        writer.append_data(cv2.cvtColor(overlay, cv2.COLOR_BGR2RGB))
         last_full_frame = frame
         frame_idx += 1
 
     cap.release()
-    writer.release()
+    writer.close()
     elapsed = time.time() - t0
     print(f"Processed {frame_idx} frames in {elapsed:.1f}s ({frame_idx/max(elapsed,1e-6):.1f} fps)")
 
@@ -199,7 +215,7 @@ def run_pipeline(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Delhi Metro crowd analytics pipeline")
     parser.add_argument("--video", required=True)
-    parser.add_argument("--zones", default="config/zones.json")
+    parser.add_argument("--zones", default=DEFAULT_ZONES_PATH)
     parser.add_argument("--output", default="output")
     parser.add_argument("--backend", choices=["yolo", "hog"], default="hog")
     parser.add_argument("--model", default="yolov8n.pt")
